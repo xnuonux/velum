@@ -158,6 +158,12 @@ export default function App() {
             bring a name and a few true sentences ... leave with a complete, breathing site in one
             self-contained file. it cannot make an ugly one.
           </p>
+          <p className="a-note a-proof">
+            poured with velum, opened raw:
+            {' '}<a href="/showcase/meridian-glass.html" target="_blank" rel="noreferrer">meridian glass</a> ·{' '}
+            <a href="/showcase/halden-and-ware.html" target="_blank" rel="noreferrer">halden and ware</a> ·{' '}
+            <a href="/showcase/sable-park.html" target="_blank" rel="noreferrer">sable park</a>
+          </p>
 
           {sites.length > 0 && (
             <div className="a-saved">
