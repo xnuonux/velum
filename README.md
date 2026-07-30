@@ -31,4 +31,4 @@ npm run build
 - the LAPIDARY seam ... when the full design-system foundry exists, velum's embedded foundry defers to it (same contract, deeper engine).
 - deploy hooks (netlify drop, a purchased domain flow).
 
-the full godspec lives at `docs/blueprint.md`. the web is starving for surfaces that feel alive; velum pours them. 🌙
+the full godspec lives at `docs/blueprint.md`. putting the file on the internet is `docs/deploy.md`. the web is starving for surfaces that feel alive; velum pours them. 🌙
