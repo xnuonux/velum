@@ -8,6 +8,9 @@ import { forgeSystem, inferDialect } from './design/lapidary';
 import { checkFloor } from './design/quality';
 import { composeSite } from './export/compose';
 import { draftSections, newSpec } from './draft';
+import { isUnlocked, markUnlocked, getPending, setPending } from './paywall/entitlement';
+import { paymentUrl, PAYMENT_LINK, PRICE_USD } from './paywall/config';
+import PricingModal from './paywall/PricingModal';
 import runtimeJs from './runtime/site-runtime.js?raw';
 
 const STORE = 'velum.sites';
@@ -39,10 +42,41 @@ export default function App() {
   const [fStone, setFStone] = useState<string>('auto');
   const [forgeNote, setForgeNote] = useState<string | null>(null);
 
+  // the paywall
+  const [payOpen, setPayOpen] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
+  const [, setUnlockTick] = useState(0); // re-render when an unlock lands
+
   const spec = useMemo(() => sites.find(s => s.id === currentId) ?? null, [sites, currentId]);
 
   useEffect(() => {
     document.body.classList.add('a-grain');
+  }, []);
+
+  // the return trip from stripe: #/unlock?session_id=cs_... (+ the pending pour in localStorage)
+  useEffect(() => {
+    const m = location.hash.match(/^#\/unlock\?(.*)$/);
+    if (!m) return;
+    const sessionId = new URLSearchParams(m[1]).get('session_id');
+    const pending = getPending();
+    history.replaceState(null, '', location.pathname + location.search);
+    if (!sessionId || !pending) {
+      setToast('returned from stripe, but no pour was waiting ... if you paid, open your pour and export again.');
+      return;
+    }
+    fetch(`/.netlify/functions/stripe-unlock?session_id=${encodeURIComponent(sessionId)}&project=${encodeURIComponent(pending.projectId)}`)
+      .then(r => r.json())
+      .then(res => {
+        if (res.ok) {
+          markUnlocked(pending.projectId, sessionId);
+          setPending(null);
+          setToast('paid ... this pour is yours. export it, revise it, re-export it ... forever.');
+          setUnlockTick(t => t + 1);
+        } else {
+          setToast('stripe did not confirm that payment ... if you were charged, write to us with the receipt.');
+        }
+      })
+      .catch(() => setToast('the unlock check could not reach home ... try the export again in a moment.'));
   }, []);
 
   const update = (patch: Partial<SiteSpec>) => {
@@ -83,12 +117,26 @@ export default function App() {
 
   const doExport = () => {
     if (!spec || !html) return;
+    if (!isUnlocked(spec.id)) {
+      setPayOpen(true);
+      return;
+    }
     const blob = new Blob([html], { type: 'text/html' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = spec.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') + '.html';
     a.click();
     URL.revokeObjectURL(a.href);
+  };
+
+  const goPay = () => {
+    if (!spec) return;
+    if (!PAYMENT_LINK) {
+      setToast('payments are not wired yet ... the stripe payment link is missing from this build.');
+      return;
+    }
+    setPending({ projectId: spec.id, at: Date.now() });
+    location.href = paymentUrl(spec.id);
   };
 
   const remove = (id: string) => {
@@ -117,6 +165,7 @@ export default function App() {
               {sites.map(s => (
                 <div className="row" key={s.id}>
                   <span className="nm">{s.name}</span>
+                  {isUnlocked(s.id) && <span className="paid">paid</span>}
                   <span className="meta">
                     {dialectById(s.dialectId).name} · {s.siteType} · {new Date(s.updatedAt).toLocaleDateString()}
                   </span>
@@ -166,7 +215,16 @@ export default function App() {
             the drafter is a seeded taste engine over curated banks + your own words ... deterministic,
             honest, no model called. placeholders say they are placeholders; everything is editable on the bench.
           </p>
+          <p className="a-note">
+            free to pour, free to shape. the file itself is a one-time ${PRICE_USD} per site ...
+            revisions and re-exports of a paid pour, free forever.
+          </p>
         </div>
+        {toast && (
+          <div className="a-toast" onClick={() => setToast(null)}>
+            {toast} <span className="x">dismiss</span>
+          </div>
+        )}
       </>
     );
   }
@@ -184,6 +242,9 @@ export default function App() {
           <button className="a-btn gold" onClick={doExport}>export the html</button>
           <button className="a-btn" onClick={redraft}>redraft</button>
         </div>
+        {isUnlocked(spec.id)
+          ? <p className="a-note" style={{ color: 'var(--a-green)' }}>paid ... this pour exports freely, every revision, forever.</p>
+          : <p className="a-note">the preview is free. the file is a one-time payment ... every revision after, free forever.</p>}
         <p className="a-note">the preview is the export, byte for byte. redraft re-pours the copy from a new seed; your stone + tuning stay.</p>
 
         <label className="a-label">the stone</label>
@@ -237,6 +298,12 @@ export default function App() {
           ))}
         </div>
       </div>
+      {payOpen && <PricingModal siteName={spec.name} onPay={goPay} onClose={() => setPayOpen(false)} />}
+      {toast && (
+        <div className="a-toast" onClick={() => setToast(null)}>
+          {toast} <span className="x">dismiss</span>
+        </div>
+      )}
     </div>
   );
 }
