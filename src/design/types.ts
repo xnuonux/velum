@@ -38,6 +38,7 @@ export type CursorId = 'moon' | 'water' | 'ember' | 'gem' | 'dither' | 'none';
 export type SectionKind =
   | 'hero'
   | 'statement'
+  | 'prose'
   | 'work'
   | 'features'
   | 'offer'

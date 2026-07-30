@@ -94,6 +94,15 @@ a{color:var(--ink);text-decoration:none}
 }
 .v-statement p em{color:var(--accent);font-style:italic}
 
+/* the prose ... the reading register */
+.v-prose{max-width:820px}
+.v-prose h2{font-size:clamp(28px,4vw,44px);font-weight:500;line-height:1.12;margin-bottom:28px}
+.v-prose-body p{font-size:clamp(17px,1.3vw,20px);line-height:1.8;margin-bottom:1.4em}
+.v-prose-body p:first-of-type::first-letter{
+  font-family:var(--display);font-size:3.1em;float:left;line-height:.86;
+  padding-right:.14em;color:var(--ink);
+}
+
 /* glass */
 .v-glass{
   background:var(--glass);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);

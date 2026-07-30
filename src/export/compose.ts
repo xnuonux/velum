@@ -51,6 +51,13 @@ function renderSection(s: SectionInstance, spec: SiteSpec, system: DesignSystem)
 </section>`;
     }
 
+    case 'prose':
+      return `<section class="v-prose">
+  <span class="v-eyebrow v-rise">${esc(s.eyebrow ?? 'the longer telling')}</span>
+  ${s.heading ? `<h2 class="v-rise v-d1">${esc(s.heading)}</h2>` : ''}
+  <div class="v-prose-body v-rise v-d2">${paras(s.body ?? '')}</div>
+</section>`;
+
     case 'work': {
       const items = (s.works ?? [])
         .map(

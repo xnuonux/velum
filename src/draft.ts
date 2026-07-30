@@ -2,7 +2,7 @@
 // deterministically (same intent + seed, same draft). this is a seeded
 // composition over curated banks + the story's own words ... a taste engine,
 // not a model, and every placeholder says it is one. redraft cycles the seed.
-import type { SectionInstance, SiteSpec, SiteType } from './design/types';
+import type { SectionInstance, SectionKind, SiteSpec, SiteType } from './design/types';
 import { hashText, seeded } from './design/lapidary';
 
 let n = 0;
@@ -56,6 +56,17 @@ export function draftSections(name: string, story: string, siteType: SiteType, s
     kind: 'statement',
     eyebrow: 'the idea',
     body: statement,
+  };
+
+  const prose: SectionInstance = {
+    id: sid(),
+    kind: 'prose',
+    eyebrow: 'the longer telling',
+    heading: 'in full',
+    body:
+      ss.length > 2
+        ? ss.slice(2).join(' ')
+        : 'a placeholder passage ... replace it with the longer telling: how this started, what it costs, why it stays.',
   };
 
   const work: SectionInstance = {
@@ -124,10 +135,36 @@ export function draftSections(name: string, story: string, siteType: SiteType, s
     portfolio: [hero, stmt, work, quote, contact, footer],
     landing: [hero, stmt, features, offer, quote, contact, footer],
     product: [hero, features, stmt, offer, contact, footer],
-    personal: [hero, stmt, features, quote, contact, footer],
-    studio: [hero, stmt, work, features, contact, footer],
+    personal: [hero, stmt, prose, quote, contact, footer],
+    studio: [hero, stmt, work, prose, features, contact, footer],
   };
   return byType[siteType];
+}
+
+/** one honest section of a given kind, for the bench's add-a-section control.
+ *  every placeholder says it is one. */
+export function blankSection(kind: SectionKind): SectionInstance {
+  const id = sid();
+  switch (kind) {
+    case 'hero':
+      return { id, kind, eyebrow: 'a living site', heading: 'the name', body: 'a placeholder lead ... your first true sentence.', cta: 'enter' };
+    case 'statement':
+      return { id, kind, eyebrow: 'the idea', body: 'a placeholder statement ... say the one true thing, plainly.' };
+    case 'prose':
+      return { id, kind, eyebrow: 'the longer telling', heading: 'in full', body: 'a placeholder passage ... the longer telling goes here. how it started, what it costs, why it stays.' };
+    case 'work':
+      return { id, kind, eyebrow: 'the work', heading: 'selected work', works: [{ title: 'a piece', note: 'a placeholder piece ... swap in your own title, note, and image.' }] };
+    case 'features':
+      return { id, kind, eyebrow: 'what it holds', heading: 'what this holds', features: [{ title: 'a strength', note: 'a placeholder feature ... name the real one.' }] };
+    case 'offer':
+      return { id, kind, eyebrow: 'the offer', heading: 'ways in', tiers: [{ name: 'the way', price: '$ ...', note: 'a placeholder tier ... name the real way in.', points: ['one true thing'] }] };
+    case 'quote':
+      return { id, kind, quoteText: 'a placeholder quote ... the truest sentence, kept.', quoteBy: 'the name' };
+    case 'contact':
+      return { id, kind, eyebrow: 'reach', heading: 'reach me', contactLine: 'a placeholder line ... how a letter finds you.', email: 'you@yourdomain.com', cta: 'write to me', links: [] };
+    case 'footer':
+      return { id, kind, body: 'the name ... ' + new Date().getFullYear() };
+  }
 }
 
 export function newSpec(name: string, story: string, siteType: SiteType, dialectId: string, seed: number): SiteSpec {

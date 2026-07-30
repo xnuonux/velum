@@ -113,8 +113,23 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 .a-sec-head { display: flex; align-items: center; gap: 10px; padding: 10px 14px; cursor: pointer; }
 .a-sec-head .k { font-family: var(--a-mono); font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: var(--a-accent); }
 .a-sec-head .t { color: var(--a-dim); font-size: 13px; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.a-sec-ctl { display: inline-flex; gap: 2px; }
+.a-sec-ctl button {
+  font-family: var(--a-mono); font-size: 11px; color: var(--a-ghost); padding: 2px 6px;
+  border: 1px solid transparent; border-radius: 2px; transition: all 140ms var(--a-ease);
+}
+.a-sec-ctl button:hover:not(:disabled) { color: var(--a-ink); border-color: var(--a-hair); }
+.a-sec-ctl button:disabled { opacity: .25; cursor: default; }
+.a-sec-ctl button.rm:hover { color: var(--a-red); }
 .a-sec-body { padding: 4px 14px 16px; border-top: 1px solid rgba(220, 227, 240, .05); }
 .a-mini { font-family: var(--a-mono); font-size: 10px; letter-spacing: .12em; color: var(--a-ghost); display: block; margin: 10px 0 4px; }
+.a-add-sec { align-items: stretch; }
+.a-add-sec .a-select { flex: 1; }
+.a-img-row { display: flex; gap: 8px; align-items: center; margin-top: 6px; }
+.a-img-row .nm { font-size: 12px; color: var(--a-dim); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.a-img-row .has-img { font-family: var(--a-mono); font-size: 10px; letter-spacing: .1em; color: var(--a-green); }
+.a-img-row .a-btn { font-size: 10px; padding: 4px 10px; }
+.a-file { cursor: pointer; display: inline-block; }
 
 .a-slider-row { display: grid; grid-template-columns: 66px 1fr 44px; align-items: center; gap: 10px; margin-top: 10px; }
 .a-slider-row .v { font-family: var(--a-mono); font-size: 11px; color: var(--a-ghost); text-align: right; }

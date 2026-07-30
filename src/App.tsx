@@ -2,12 +2,12 @@
 // pours a living site (the preview IS the export, byte for byte), holds the
 // quality floor as visible rows, and hands you one self-contained html file.
 import { useEffect, useMemo, useState } from 'react';
-import type { SectionInstance, SiteSpec, SiteType, CursorId } from './design/types';
+import type { SectionInstance, SectionKind, SiteSpec, SiteType, CursorId } from './design/types';
 import { DIALECTS, dialectById } from './design/dialects';
 import { forgeSystem, inferDialect } from './design/lapidary';
 import { checkFloor } from './design/quality';
 import { composeSite } from './export/compose';
-import { draftSections, newSpec } from './draft';
+import { draftSections, newSpec, blankSection } from './draft';
 import { isUnlocked, markUnlocked, getPending, setPending } from './paywall/entitlement';
 import { paymentUrl, PAYMENT_LINK, PRICE_USD } from './paywall/config';
 import PricingModal from './paywall/PricingModal';
@@ -16,6 +16,7 @@ import runtimeJs from './runtime/site-runtime.js?raw';
 const STORE = 'velum.sites';
 const TYPES: SiteType[] = ['portfolio', 'landing', 'personal', 'studio', 'product'];
 const CURSORS: CursorId[] = ['moon', 'water', 'ember', 'gem', 'dither', 'none'];
+const KINDS: SectionKind[] = ['hero', 'statement', 'prose', 'work', 'features', 'offer', 'quote', 'contact', 'footer'];
 
 function loadSites(): SiteSpec[] {
   try {
@@ -46,6 +47,7 @@ export default function App() {
   const [payOpen, setPayOpen] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const [, setUnlockTick] = useState(0); // re-render when an unlock lands
+  const [addKind, setAddKind] = useState<SectionKind>('prose');
 
   const spec = useMemo(() => sites.find(s => s.id === currentId) ?? null, [sites, currentId]);
 
@@ -89,6 +91,24 @@ export default function App() {
   const updateSection = (id: string, patch: Partial<SectionInstance>) => {
     if (!spec) return;
     update({ sections: spec.sections.map(s => (s.id === id ? { ...s, ...patch } : s)) });
+  };
+
+  const moveSection = (id: string, dir: -1 | 1) => {
+    if (!spec) return;
+    const i = spec.sections.findIndex(s => s.id === id);
+    const j = i + dir;
+    if (i < 0 || j < 0 || j >= spec.sections.length) return;
+    const sections = [...spec.sections];
+    [sections[i], sections[j]] = [sections[j], sections[i]];
+    update({ sections });
+  };
+
+  const removeSection = (id: string) => {
+    if (spec) update({ sections: spec.sections.filter(s => s.id !== id) });
+  };
+
+  const addSection = () => {
+    if (spec) update({ sections: [...spec.sections, blankSection(addKind)] });
   };
 
   const pour = () => {
@@ -283,9 +303,23 @@ export default function App() {
         <input id="v-desc" className="a-input" value={spec.description} onChange={e => update({ description: e.target.value })} />
 
         <label className="a-label">the sections</label>
-        {spec.sections.map(s => (
-          <SectionEditor key={s.id} s={s} onChange={patch => updateSection(s.id, patch)} />
+        {spec.sections.map((s, i) => (
+          <SectionEditor
+            key={s.id}
+            s={s}
+            onChange={patch => updateSection(s.id, patch)}
+            onMove={dir => moveSection(s.id, dir)}
+            onRemove={() => removeSection(s.id)}
+            first={i === 0}
+            last={i === spec.sections.length - 1}
+          />
         ))}
+        <div className="a-row a-add-sec">
+          <select className="a-select" value={addKind} onChange={e => setAddKind(e.target.value as SectionKind)} aria-label="section kind">
+            {KINDS.map(k => <option key={k} value={k}>{k}</option>)}
+          </select>
+          <button className="a-btn" onClick={addSection}>add a section</button>
+        </div>
       </div>
 
       <div className="a-stage">
@@ -315,7 +349,14 @@ export default function App() {
 }
 
 /* ── the per-section editor ... small fields, the preview is the star ── */
-function SectionEditor({ s, onChange }: { s: SectionInstance; onChange: (p: Partial<SectionInstance>) => void }) {
+function SectionEditor({ s, onChange, onMove, onRemove, first, last }: {
+  s: SectionInstance;
+  onChange: (p: Partial<SectionInstance>) => void;
+  onMove: (dir: -1 | 1) => void;
+  onRemove: () => void;
+  first: boolean;
+  last: boolean;
+}) {
   const [open, setOpen] = useState(false);
   const title = s.heading ?? s.quoteText ?? s.body ?? s.kind;
   return (
@@ -323,6 +364,11 @@ function SectionEditor({ s, onChange }: { s: SectionInstance; onChange: (p: Part
       <div className="a-sec-head" onClick={() => setOpen(v => !v)}>
         <span className="k">{s.kind}</span>
         <span className="t">{title}</span>
+        <span className="a-sec-ctl" onClick={e => e.stopPropagation()}>
+          <button title="move up" disabled={first} onClick={() => onMove(-1)}>↑</button>
+          <button title="move down" disabled={last} onClick={() => onMove(1)}>↓</button>
+          <button title="remove the section" className="rm" onClick={onRemove}>×</button>
+        </span>
         <span style={{ color: 'var(--a-ghost)' }}>{open ? '−' : '+'}</span>
       </div>
       {open && (
@@ -378,13 +424,46 @@ function SectionEditor({ s, onChange }: { s: SectionInstance; onChange: (p: Part
                     works: e.target.value
                       .split('\n')
                       .filter(l => l.trim())
-                      .map(l => {
+                      .map((l, i) => {
                         const [title, ...rest] = l.split('|');
-                        return { title: title.trim(), note: rest.join('|').trim() };
+                        // retyping the lines keeps any image already embedded at that slot
+                        return { title: title.trim(), note: rest.join('|').trim(), image: s.works?.[i]?.image };
                       }),
                   })
                 }
               />
+              {s.works.map((w, i) => (
+                <div className="a-img-row" key={i}>
+                  <span className="nm">{w.title || 'piece ' + (i + 1)}</span>
+                  {w.image && <span className="has-img">image embedded</span>}
+                  <label className="a-btn ghost a-file">
+                    {w.image ? 'swap' : 'add image'}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      hidden
+                      onChange={e => {
+                        const f = e.target.files?.[0];
+                        if (!f) return;
+                        const r = new FileReader();
+                        r.onload = () =>
+                          onChange({ works: (s.works ?? []).map((x, j) => (j === i ? { ...x, image: String(r.result) } : x)) });
+                        r.readAsDataURL(f);
+                        e.target.value = '';
+                      }}
+                    />
+                  </label>
+                  {w.image && (
+                    <button
+                      className="a-btn danger"
+                      onClick={() => onChange({ works: (s.works ?? []).map((x, j) => (j === i ? { ...x, image: undefined } : x)) })}
+                    >
+                      clear
+                    </button>
+                  )}
+                </div>
+              ))}
+              <span className="a-mini">images embed into the one file ... lean ones keep the pour light.</span>
             </>
           )}
           {s.features && (
