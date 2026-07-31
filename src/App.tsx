@@ -16,7 +16,7 @@ import runtimeJs from './runtime/site-runtime.js?raw';
 const STORE = 'velum.sites';
 const TYPES: SiteType[] = ['portfolio', 'landing', 'personal', 'studio', 'product'];
 const CURSORS: CursorId[] = ['moon', 'water', 'ember', 'gem', 'dither', 'none'];
-const KINDS: SectionKind[] = ['hero', 'statement', 'prose', 'work', 'features', 'offer', 'quote', 'contact', 'footer'];
+const KINDS: SectionKind[] = ['hero', 'statement', 'prose', 'work', 'gallery', 'features', 'offer', 'quote', 'contact', 'footer'];
 
 function loadSites(): SiteSpec[] {
   try {
@@ -463,6 +463,70 @@ function SectionEditor({ s, onChange, onMove, onRemove, first, last }: {
                   )}
                 </div>
               ))}
+              <span className="a-mini">images embed into the one file ... lean ones keep the pour light.</span>
+            </>
+          )}
+          {s.galleryItems && (
+            <>
+              <span className="a-mini">frames ... a caption and an image each</span>
+              {s.galleryItems.map((g, i) => (
+                <div key={i}>
+                  <input
+                    className="a-input"
+                    value={g.caption}
+                    placeholder="a caption for this frame"
+                    onChange={e =>
+                      onChange({ galleryItems: (s.galleryItems ?? []).map((x, j) => (j === i ? { ...x, caption: e.target.value } : x)) })
+                    }
+                  />
+                  <div className="a-img-row">
+                    <span className="nm">{'frame ' + (i + 1)}</span>
+                    {g.image && <span className="has-img">image embedded</span>}
+                    <label className="a-btn ghost a-file">
+                      {g.image ? 'swap' : 'add image'}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        hidden
+                        onChange={e => {
+                          const f = e.target.files?.[0];
+                          if (!f) return;
+                          const r = new FileReader();
+                          r.onload = () =>
+                            onChange({ galleryItems: (s.galleryItems ?? []).map((x, j) => (j === i ? { ...x, image: String(r.result) } : x)) });
+                          r.readAsDataURL(f);
+                          e.target.value = '';
+                        }}
+                      />
+                    </label>
+                    {g.image && (
+                      <button
+                        className="a-btn danger"
+                        onClick={() => onChange({ galleryItems: (s.galleryItems ?? []).map((x, j) => (j === i ? { ...x, image: undefined } : x)) })}
+                      >
+                        clear
+                      </button>
+                    )}
+                    <button
+                      className="a-btn danger"
+                      title="remove the frame"
+                      onClick={() => onChange({ galleryItems: (s.galleryItems ?? []).filter((_, j) => j !== i) })}
+                    >
+                      ×
+                    </button>
+                  </div>
+                </div>
+              ))}
+              <div className="a-row" style={{ marginTop: 8 }}>
+                <button
+                  className="a-btn"
+                  onClick={() =>
+                    onChange({ galleryItems: [...(s.galleryItems ?? []), { caption: 'a placeholder caption ... one true line about this frame.' }] })
+                  }
+                >
+                  add a frame
+                </button>
+              </div>
               <span className="a-mini">images embed into the one file ... lean ones keep the pour light.</span>
             </>
           )}

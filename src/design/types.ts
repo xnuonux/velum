@@ -40,6 +40,7 @@ export type SectionKind =
   | 'statement'
   | 'prose'
   | 'work'
+  | 'gallery'
   | 'features'
   | 'offer'
   | 'quote'
@@ -51,6 +52,12 @@ export interface WorkItem {
   note: string;
   /** optional data-url image; absent means a generated presence block */
   image?: string;
+}
+
+export interface GalleryItem {
+  /** optional data-url image; absent means a generated presence block */
+  image?: string;
+  caption: string;
 }
 
 export interface FeatureItem {
@@ -75,6 +82,7 @@ export interface SectionInstance {
   eyebrow?: string;
   cta?: string;
   works?: WorkItem[];
+  galleryItems?: GalleryItem[];
   features?: FeatureItem[];
   tiers?: OfferTier[];
   quoteText?: string;

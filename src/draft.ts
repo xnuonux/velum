@@ -80,6 +80,16 @@ export function draftSections(name: string, story: string, siteType: SiteType, s
     })),
   };
 
+  const gallery = (count: number): SectionInstance => ({
+    id: sid(),
+    kind: 'gallery',
+    eyebrow: 'the gallery',
+    heading: 'in frames',
+    galleryItems: Array.from({ length: count }, () => ({
+      caption: 'a placeholder caption ... one true line about this frame.',
+    })),
+  });
+
   const features: SectionInstance = {
     id: sid(),
     kind: 'features',
@@ -132,10 +142,10 @@ export function draftSections(name: string, story: string, siteType: SiteType, s
   };
 
   const byType: Record<SiteType, SectionInstance[]> = {
-    portfolio: [hero, stmt, work, quote, contact, footer],
+    portfolio: [hero, stmt, work, gallery(4), quote, contact, footer],
     landing: [hero, stmt, features, offer, quote, contact, footer],
     product: [hero, features, stmt, offer, contact, footer],
-    personal: [hero, stmt, prose, quote, contact, footer],
+    personal: [hero, stmt, prose, gallery(3), quote, contact, footer],
     studio: [hero, stmt, work, prose, features, contact, footer],
   };
   return byType[siteType];
@@ -154,6 +164,8 @@ export function blankSection(kind: SectionKind): SectionInstance {
       return { id, kind, eyebrow: 'the longer telling', heading: 'in full', body: 'a placeholder passage ... the longer telling goes here. how it started, what it costs, why it stays.' };
     case 'work':
       return { id, kind, eyebrow: 'the work', heading: 'selected work', works: [{ title: 'a piece', note: 'a placeholder piece ... swap in your own title, note, and image.' }] };
+    case 'gallery':
+      return { id, kind, eyebrow: 'the gallery', heading: 'in frames', galleryItems: [{ caption: 'a placeholder caption ... one true line about this frame.' }, { caption: 'another placeholder frame ... swap in your own image and words.' }] };
     case 'features':
       return { id, kind, eyebrow: 'what it holds', heading: 'what this holds', features: [{ title: 'a strength', note: 'a placeholder feature ... name the real one.' }] };
     case 'offer':

@@ -1,7 +1,7 @@
 // the composer ... a spec + a forged system + the runtime, folded into ONE
 // self-contained html file. no imports, no cdn, no telemetry in the export.
 // the preview iframe renders exactly this string; what you see is what ships.
-import type { DesignSystem, SectionInstance, SiteSpec, WorkItem } from '../design/types';
+import type { DesignSystem, GalleryItem, SectionInstance, SiteSpec, WorkItem } from '../design/types';
 import { seeded, hashText } from '../design/lapidary';
 import { siteCss } from './styles';
 
@@ -70,6 +70,21 @@ function renderSection(s: SectionInstance, spec: SiteSpec, system: DesignSystem)
       return `<section id="s-work">
   <div class="v-head v-rise"><span class="v-eyebrow">${esc(s.eyebrow ?? 'the work')}</span><h2>${esc(s.heading ?? '')}</h2></div>
   <div class="v-work-grid">${items}</div>
+</section>`;
+    }
+
+    case 'gallery': {
+      const items = (s.galleryItems ?? [])
+        .map(
+          (g: GalleryItem, i: number) => `<figure class="v-gallery-frame v-rise v-d${(i % 4) + 1}">
+    ${g.image ? `<img src="${g.image}" alt="${esc(g.caption)}" loading="lazy" />` : presence(system, spec.name + 'gallery' + i)}
+    <figcaption>${esc(g.caption)}</figcaption>
+  </figure>`
+        )
+        .join('\n');
+      return `<section id="s-gallery">
+  <div class="v-head v-rise"><span class="v-eyebrow">${esc(s.eyebrow ?? 'the gallery')}</span><h2>${esc(s.heading ?? '')}</h2></div>
+  <div class="v-gallery">${items}</div>
 </section>`;
     }
 

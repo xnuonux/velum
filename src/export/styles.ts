@@ -124,6 +124,15 @@ a{color:var(--ink);text-decoration:none}
 .v-work-body h3{font-size:21px;margin-bottom:8px;font-weight:600}
 .v-work-body p{font-size:15px}
 
+/* the gallery ... quiet frames, the images are the content */
+.v-gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(300px,100%),1fr));gap:26px}
+.v-gallery-frame{border:1px solid var(--hair);border-radius:4px;overflow:hidden;background:var(--glass)}
+.v-gallery-frame img{aspect-ratio:4/3;width:100%;object-fit:cover;display:block;filter:saturate(.92)}
+.v-gallery-frame figcaption{
+  padding:14px 18px 16px;font-size:13px;color:var(--ink-dim);letter-spacing:.04em;
+  border-top:1px solid var(--hair);
+}
+
 /* the features */
 .v-feat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(260px,100%),1fr));gap:26px}
 .v-feat{padding:30px 28px 34px}
