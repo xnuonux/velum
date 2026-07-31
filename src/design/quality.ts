@@ -35,6 +35,11 @@ export function checkFloor(spec: SiteSpec, system: DesignSystem): FloorCheck[] {
       detail: `ink on ground ${ratio.toFixed(1)}:1 (floor 7:1) ... mid-ramp ${midRatio.toFixed(1)}:1`,
     },
     {
+      law: 'metal legibility',
+      held: contrastRatio(d.metal, ground) >= 4.5,
+      detail: `metal on ground ${contrastRatio(d.metal, ground).toFixed(1)}:1 (floor 4.5:1) ... eyebrows and small cuts stay readable`,
+    },
+    {
       law: 'no flat fill',
       held: true,
       structural: true,
