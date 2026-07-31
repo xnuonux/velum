@@ -69,6 +69,12 @@ export function checkFloor(spec: SiteSpec, system: DesignSystem): FloorCheck[] {
       structural: true,
       detail: 'cubic-bezier(.22,.68,.12,1), 300ms base ... no springs, nothing bounces',
     },
+    {
+      law: 'one file',
+      held: true,
+      structural: true,
+      detail: 'nav, both pages, shader, cursor, reveals ... one self-contained html, hash-routed (#/ + #/deeper), no server, no cdn scripts',
+    },
   ];
   return checks;
 }

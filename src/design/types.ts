@@ -76,6 +76,9 @@ export interface OfferTier {
 export interface SectionInstance {
   id: string;
   kind: SectionKind;
+  /** which view of the one file this section lives on ... absent means page one.
+   *  hero anchors page one; footer renders on both. */
+  page?: 'one' | 'two';
   /** per-kind content lives here; keeps sections reorderable as one list */
   heading?: string;
   body?: string;

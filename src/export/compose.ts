@@ -1,9 +1,18 @@
 // the composer ... a spec + a forged system + the runtime, folded into ONE
 // self-contained html file. no imports, no cdn, no telemetry in the export.
 // the preview iframe renders exactly this string; what you see is what ships.
-import type { DesignSystem, GalleryItem, SectionInstance, SiteSpec, WorkItem } from '../design/types';
+import type { DesignSystem, GalleryItem, SectionInstance, SiteSpec, SiteType, WorkItem } from '../design/types';
 import { seeded, hashText } from '../design/lapidary';
 import { siteCss } from './styles';
+
+/** the second page's name, per shape ... shown in the shared nav + the page head. */
+export const PAGE_TWO_NAMES: Record<SiteType, string> = {
+  portfolio: 'the archive',
+  personal: 'the letters',
+  studio: 'the practice',
+  landing: 'the deeper telling',
+  product: 'the deeper telling',
+};
 
 function esc(text: string): string {
   return text
@@ -156,6 +165,40 @@ export function composeSite(spec: SiteSpec, system: DesignSystem, runtimeJs: str
     ink: d.ink,
   };
   const sections = spec.sections.map(s => renderSection(s, spec, system)).join('\n\n');
+
+  // the second page ... when any section is assigned, the export becomes a
+  // tiny site: a shared nav + two views, hash-routed by the runtime (#/ and
+  // #/deeper), still one self-contained file. the footer renders on both.
+  const two = spec.sections.filter(s => s.page === 'two' && s.kind !== 'footer' && s.kind !== 'hero');
+  const hasTwo = two.length > 0;
+  let nav = '';
+  let body = `<main>\n${sections}\n</main>`;
+  if (hasTwo) {
+    const twoName = PAGE_TWO_NAMES[spec.siteType] ?? 'deeper';
+    const one = spec.sections.filter(s => s.page !== 'two' && s.kind !== 'footer');
+    const footer = spec.sections.find(s => s.kind === 'footer');
+    nav = `<nav class="v-nav">
+  <a class="v-nav-name" href="#/">${esc(spec.name)}</a>
+  <span class="v-nav-links">
+    <a href="#/" data-nav="one">the pour</a>
+    <a href="#/deeper" data-nav="two">${esc(twoName)}</a>
+  </span>
+</nav>`;
+    const pageHead = `<section class="v-pagehead">
+  <span class="v-eyebrow v-rise">${esc(spec.name)}</span>
+  <h2 class="v-rise v-d1">${esc(twoName)}</h2>
+</section>`;
+    body = `<main>
+<div class="v-page" data-page="one">
+${one.map(s => renderSection(s, spec, system)).join('\n\n')}
+</div>
+<div class="v-page" data-page="two">
+${pageHead}
+${two.map(s => renderSection(s, spec, system)).join('\n\n')}
+</div>
+${footer ? renderSection(footer, spec, system) : ''}
+</main>`;
+  }
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -174,9 +217,8 @@ ${siteCss(system, spec)}
 <body>
 <canvas id="veil" aria-hidden="true"></canvas>
 <div class="v-grain" aria-hidden="true"></div>
-<main>
-${sections}
-</main>
+${nav}
+${body}
 <script type="application/json" id="velum-config">${JSON.stringify(config)}</script>
 <script>
 ${runtimeJs}

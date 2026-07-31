@@ -257,6 +257,7 @@ export default function App() {
 
   /* ── the bench ── */
   const d = system.dialect;
+  const hasTwo = spec.sections.some(s => s.page === 'two');
   return (
     <div className="a-bench">
       <div className="a-rail">
@@ -326,7 +327,7 @@ export default function App() {
         <div className="a-stagebar">
           <span>the pour · {d.name}</span>
           <span className="spacer" />
-          <span>{(html.length / 1024).toFixed(0)} kb · one file · no cdn scripts, fonts only</span>
+          <span>{(html.length / 1024).toFixed(0)} kb · {hasTwo ? 'two pages, one file' : 'one file'} · no cdn scripts, fonts only</span>
         </div>
         <iframe title="the living preview" srcDoc={html} sandbox="allow-scripts allow-same-origin" />
         <div className="a-floor">
@@ -365,6 +366,15 @@ function SectionEditor({ s, onChange, onMove, onRemove, first, last }: {
         <span className="k">{s.kind}</span>
         <span className="t">{title}</span>
         <span className="a-sec-ctl" onClick={e => e.stopPropagation()}>
+          {s.kind !== 'hero' && s.kind !== 'footer' && (
+            <button
+              title={s.page === 'two' ? 'lives on page two ... click to bring it back to page one' : 'lives on page one ... click to send it to page two'}
+              className={s.page === 'two' ? 'pg two' : 'pg'}
+              onClick={() => onChange({ page: s.page === 'two' ? 'one' : 'two' })}
+            >
+              {s.page === 'two' ? '2' : '1'}
+            </button>
+          )}
           <button title="move up" disabled={first} onClick={() => onMove(-1)}>↑</button>
           <button title="move down" disabled={last} onClick={() => onMove(1)}>↓</button>
           <button title="remove the section" className="rm" onClick={onRemove}>×</button>

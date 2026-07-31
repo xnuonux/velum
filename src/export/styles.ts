@@ -181,8 +181,38 @@ a{color:var(--ink);text-decoration:none}
 .v-footer p{font-size:13px;letter-spacing:.14em}
 .v-footer .v-cut{font-size:11px;letter-spacing:.2em;text-transform:uppercase;opacity:.45;margin-top:10px}
 
+/* the shared nav ... glass bar, hairline cut, the active page in metal */
+.v-nav{
+  position:fixed;top:0;left:0;right:0;z-index:3;
+  display:flex;align-items:center;gap:clamp(18px,3vw,34px);
+  padding:15px clamp(22px,5vw,54px);
+  background:var(--glass);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--hair);
+}
+.v-nav .v-nav-name{font-family:var(--display);font-size:17px;font-weight:500;color:var(--ink);letter-spacing:.02em}
+.v-nav .v-nav-links{margin-left:auto;display:flex;gap:clamp(16px,2.6vw,30px)}
+.v-nav a[data-nav]{
+  font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--ink-dim);
+  padding-bottom:3px;border-bottom:1px solid transparent;
+  transition:color var(--t-base) var(--ease),border-color var(--t-base) var(--ease);
+}
+.v-nav a[data-nav]:hover{color:var(--ink)}
+.v-nav a[data-nav].on{color:var(--metal);border-color:var(--metal)}
+
+/* the pages ... two views in one file. page two hides by default in css (no
+   flash of the wrong page); the runtime reveals it when the hash says so.
+   showing a page re-runs the fade on the planetarium curve. */
+@keyframes v-page-in{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.v-page{display:block;animation:v-page-in .8s var(--ease) both}
+.v-page[data-page="two"]{display:none}
+
+/* the page-two head ... quiet, an eyebrow + a title, never a second hero */
+.v-pagehead{padding-top:clamp(150px,22vh,240px);padding-bottom:clamp(24px,4vh,48px)}
+.v-pagehead h2{font-size:clamp(34px,6vw,72px);font-weight:500;line-height:1.06}
+
 @media(prefers-reduced-motion:reduce){
   .v-rise{transition:none;opacity:1;transform:none}
+  .v-page{animation:none}
   .v-eyebrow,.v-shimmer{animation:none}
   html{scroll-behavior:auto}
 }

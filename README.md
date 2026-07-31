@@ -14,6 +14,7 @@ the anti-template-builder. it cannot make an ugly one, because the quality floor
 - **galleries as a first-class section kind** ... a multi-image grid of quiet frames with captions (4/3, hairline, presence placeholders until you upload real images). drafted into portfolio and personal pours; frames add, remove, and embed like works images.
 - **the quality floor as rows** ... contrast genuinely computed (7:1 floor on ink, 4.5:1 on the metal so eyebrows stay readable), no-flat-fill / alive / coherence / real-materials / motion-composed held by construction and labeled so. taste-judged dimensions stay with human eyes ... no machine grades its own beauty here.
 - **the export** ... one html file: webgl veil shader (honest degradation ... no webgl leaves the deep gradient, reduced motion gets one still textured frame), the cursor, the reveals, all inlined. google fonts is the only external touch. no cdn scripts, no telemetry, no builder lock-in.
+- **two pages, one file** ... every pour is a tiny site: a shared glass nav hash-routes two views (#/ the pour, #/deeper the second page ... the archive / the letters / the practice / the deeper telling, by shape), the footer spans both, and sections flip pages from the bench ... still one self-contained html, no server needed.
 - **paid once, yours forever** ... $49 one-time per pour via stripe (payment link + a tiny netlify function that verifies the session and unlocks by `client_reference_id`). revisions to an unlocked pour are free forever. the three proof pours live in `public/showcase/`.
 - **sovereign** ... sites persist in localStorage; nothing leaves the machine except the file you choose to download.
 
@@ -27,7 +28,6 @@ npm run build
 
 ## what is next
 
-- a second page + shared nav (the export becomes a tiny site, still self-contained).
 - the LAPIDARY seam ... when the full design-system foundry exists, velum's embedded foundry defers to it (same contract, deeper engine).
 - deploy hooks (netlify drop, a purchased domain flow).
 

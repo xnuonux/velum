@@ -236,6 +236,39 @@
     return 'rgba(' + Math.round(c[0] * 255) + ',' + Math.round(c[1] * 255) + ',' + Math.round(c[2] * 255) + ',' + a + ')';
   }
 
+  /* ── the pages ... two views, one file, hash-routed (#/ and #/deeper) ── */
+  /* sections are hidden with display, never removed, so the reveals observer
+     (mounted once, up front, over every .v-rise) simply fires when a newly
+     shown page brings its elements into view. reduced motion: the page fade
+     is killed in css, the swap is instant. */
+  function mountPages() {
+    var pages = document.querySelectorAll('.v-page[data-page]');
+    if (pages.length < 2) return;
+    var links = document.querySelectorAll('.v-nav a[data-nav]');
+    var last = null;
+    function apply() {
+      var p = location.hash === '#/deeper' ? 'two' : 'one';
+      for (var i = 0; i < pages.length; i++) {
+        pages[i].style.display = pages[i].getAttribute('data-page') === p ? 'block' : 'none';
+      }
+      for (var j = 0; j < links.length; j++) {
+        var on = links[j].getAttribute('data-nav') === p;
+        if (on) {
+          links[j].classList.add('on');
+          links[j].setAttribute('aria-current', 'page');
+        } else {
+          links[j].classList.remove('on');
+          links[j].removeAttribute('aria-current');
+        }
+      }
+      // a page change starts at the top; an in-page anchor (#s-contact) does not
+      if (last !== null && last !== p) window.scrollTo(0, 0);
+      last = p;
+    }
+    window.addEventListener('hashchange', apply);
+    apply();
+  }
+
   /* ── the rise reveals ────────────────────────────────────────────── */
   function mountReveals() {
     var els = document.querySelectorAll('.v-rise');
@@ -251,6 +284,7 @@
     els.forEach(function (el) { io.observe(el); });
   }
 
+  mountPages();
   mountGround();
   mountCursor();
   mountReveals();

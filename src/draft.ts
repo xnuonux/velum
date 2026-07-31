@@ -141,12 +141,15 @@ export function draftSections(name: string, story: string, siteType: SiteType, s
     body: name + ' ... ' + new Date().getFullYear(),
   };
 
+  // every grammar earns the shared nav: at least one section lives on page
+  // two (the archive / the letters / the practice / the deeper telling).
+  const p2 = (s: SectionInstance): SectionInstance => ({ ...s, page: 'two' });
   const byType: Record<SiteType, SectionInstance[]> = {
-    portfolio: [hero, stmt, work, gallery(4), quote, contact, footer],
-    landing: [hero, stmt, features, offer, quote, contact, footer],
-    product: [hero, features, stmt, offer, contact, footer],
-    personal: [hero, stmt, prose, gallery(3), quote, contact, footer],
-    studio: [hero, stmt, work, prose, features, contact, footer],
+    portfolio: [hero, stmt, work, p2(prose), p2(gallery(4)), quote, contact, footer],
+    landing: [hero, stmt, features, offer, quote, p2(prose), contact, footer],
+    product: [hero, features, stmt, offer, p2(prose), contact, footer],
+    personal: [hero, stmt, p2(prose), p2(gallery(3)), quote, contact, footer],
+    studio: [hero, stmt, work, p2(prose), p2(features), contact, footer],
   };
   return byType[siteType];
 }
